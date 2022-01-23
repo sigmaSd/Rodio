@@ -73,7 +73,7 @@ function addStations(sts: {[name: string]: () => HTMLAudioElement}, grid: HTMLEl
         sts[station.name] = () => new Audio(station.url)
         cell.onclick = () => {
             if (activeStation) {
-                activeStation.pause()
+                activeStation.src = ""
             }
             activeStation = sts[station.name]()
             activeStation.play()
