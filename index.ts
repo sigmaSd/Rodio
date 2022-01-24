@@ -1,7 +1,7 @@
 let stations = {}
 let localStations = {}
 let trendingStations = {}
-let activeStation = undefined
+let activeStation: {audio: HTMLAudioElement, cell: HTMLButtonElement} = undefined
 
 document.addEventListener('DOMContentLoaded', start)
 
@@ -47,7 +47,7 @@ async function search(gridName: string) {
     addStations(stations, grid, answer, 0)
 }
 
-function addStations(sts: {[name: string]: () => HTMLAudioElement}, grid: HTMLElement, answer: [{name: string, favicon: string, url: string}], start: number) {
+function addStations(sts: {[name: string]: () => {audio: HTMLAudioElement, cell: HTMLButtonElement}}, grid: HTMLElement, answer: [{name: string, favicon: string, url: string}], start: number) {
     for (const station of answer.slice(start)) {
         if (Object.keys(sts).length > 20) {
             break
@@ -70,13 +70,21 @@ function addStations(sts: {[name: string]: () => HTMLAudioElement}, grid: HTMLEl
             cell.style.background = "rgb(0,20,10)"
             cell.textContent = station.name
         }
-        sts[station.name] = () => new Audio(station.url)
+        sts[station.name] = () => {
+            return {audio: new Audio(station.url), cell}
+        }
         cell.onclick = () => {
             if (activeStation) {
-                activeStation.src = ""
+                activeStation.audio.src = ""
+                activeStation.cell.children[0].remove()
             }
             activeStation = sts[station.name]()
-            activeStation.play()
+            const img = document.createElement("img")
+            img.src = "./assets/play.png"
+            img.style.width = "75px"
+            img.style.opacity = "80%"
+            activeStation.cell.appendChild(img)
+            activeStation.audio.play()
         }
         const label = document.createElement('p')
         label.textContent = station.name
