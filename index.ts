@@ -3,18 +3,20 @@ let localStations = {}
 let trendingStations = {}
 let activeStation: {audio: HTMLAudioElement, cell: HTMLButtonElement} = undefined
 
+type stationJson = {name: string, favicon: string, url: string}
+
 document.addEventListener('DOMContentLoaded', start)
 
 async function start() {
     {
         const div = document.getElementById("local")
         const cn = Intl.DateTimeFormat().resolvedOptions().timeZone.split('/')[1]
-        const answer = await (await fetch(`https://de1.api.radio-browser.info/json/stations/bycountry/${cn}`)).json()
+        const answer: [stationJson] = await (await fetch(`https://de1.api.radio-browser.info/json/stations/bycountry/${cn}`)).json()
         addStations(localStations, div, answer, 0)
     }
 
     const div = document.getElementById("trending")
-    const answer = await (await fetch("https://de1.api.radio-browser.info/json/stations?limit=10&order=clicktrend")).json()
+    const answer: [stationJson] = await (await fetch("https://de1.api.radio-browser.info/json/stations?limit=10&order=clicktrend")).json()
     addStations(trendingStations, div, answer, 0)
 }
 
@@ -32,7 +34,7 @@ async function search(gridName: string) {
     const input = (<HTMLInputElement>document.getElementById("input")).value
     const method = (<HTMLInputElement>document.getElementById("method")).value
 
-    let answer: any;
+    let answer: [stationJson];
     switch (method) {
         case "Country":
             answer = await (await fetch(`https://de1.api.radio-browser.info/json/stations/bycountry/${input}`)).json()
@@ -47,7 +49,7 @@ async function search(gridName: string) {
     addStations(stations, grid, answer, 0)
 }
 
-function addStations(sts: {[name: string]: () => {audio: HTMLAudioElement, cell: HTMLButtonElement}}, grid: HTMLElement, answer: [{name: string, favicon: string, url: string}], start: number) {
+function addStations(sts: {[name: string]: () => {audio: HTMLAudioElement, cell: HTMLButtonElement}}, grid: HTMLElement, answer: [stationJson], start: number) {
     for (const station of answer.slice(start)) {
         if (Object.keys(sts).length > 20) {
             break
